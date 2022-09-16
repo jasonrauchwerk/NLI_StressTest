@@ -77,6 +77,14 @@ parser.add_argument('--base_dir', dest='base_dir', help='Directory with MultiNLI
 args = parser.parse_args()
 base_dir = args.base_dir
 dev_data = dp.load_nli_data(base_dir+"/multinli_0.9_dev_matched.jsonl")
+
+# Load homophones from file
+homophones_dict = {}
+with open('homophones-1.01.txt', 'r') as f:
+    for line in f:
+        word,*homophones = line.split(',')
+        homophones_dict[word] = homophones
+
 for sample in dev_data:
 
         '''Keyboard swaps in hypothesis'''
@@ -130,7 +138,7 @@ for sample in dev_data:
                 found_sub = True
                 key_swap.append(new_sample)
 
-print len(function_data)
+print(len(function_data))
 with jsonlines.open("./multinli_0.9_matched_dev_gram_functionword_swap_pertubed.jsonl", mode='w') as writer:
     writer.write_all(function_data)
     writer.close()

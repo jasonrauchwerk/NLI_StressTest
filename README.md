@@ -50,6 +50,10 @@ If you want to directly evaluate your system on all stress tests at once you can
 
 Alternatively, you may write your own evaluation function: our script simply evaluates models on classification accuracy for each stress test at once.
 
+## Changes by Jason
+
+* Added the homophones dataset from [CMU Artificial Intelligence Repository](https://www.cs.cmu.edu/afs/cs/project/ai-repository/ai/areas/speech/database/homofonz/0.html). Removed the beginning of the txt file so only a list of words remains.
+
 ## References
 
 Please considering citing [[1]](https://arxiv.org/abs/1806.00692) if using these stress tests to evaluate Natural Language Inference models.
