@@ -52,7 +52,9 @@ Alternatively, you may write your own evaluation function: our script simply eva
 
 ## Changes by Jason
 
-* Added the homophones dataset from [CMU Artificial Intelligence Repository](https://www.cs.cmu.edu/afs/cs/project/ai-repository/ai/areas/speech/database/homofonz/0.html). Removed the beginning of the txt file so only a list of words remains.
+* Added the homophones dataset from [CMU Artificial Intelligence Repository](https://www.cs.cmu.edu/afs/cs/project/ai-repository/ai/areas/speech/database/homofonz/0.html). Removed the beginning of the txt file so only a list of words remains. Header below
+
+* Added the birkbeck dataset from [Roger Mitton's misspellings corpora at Birkbeck University of London](https://www.dcs.bbk.ac.uk/~roger/corpora.html). Header below
 
 HOMOPHONES
 
@@ -131,6 +133,17 @@ U.S.A.
 Internet email evan.antworth@sil.org
 phone 214/709-3346, -2418
 fax 214/709-2433
+
+
+birkbeck
+
+The birkbeck file contains 36,133 misspellings of 6,136 words. It is an amalgamation of errors taken from the native-speaker section (British or American writers) of the Birkbeck spelling error corpus, a collection of files of spelling errors gathered from various sources, available as separate files with detailed documentation from the Oxford Text Archive. It includes the results of spelling tests and errors from free writing, taken mostly from schoolchildren, university students or adult literacy students. Most of them were originally handwritten.
+
+Each correct word is preceded by a dollar sign and followed by its misspellings, each on one line, without duplicates. (A misspelling might appear more than once in the corpus, but only as a misspelling of different words.) Where the spelling or misspelling contained a space, this has been replaced by an underscore (a_lot, Christ_mas). While most of the misspellings are non-words, there are also some real-word errors, such as "omitted" for "admitted".
+
+Correct spellings of dictionary words are given in Oxford English form. Where the misspellings were taken from American writers, attempts at specifically American forms (color, theater etc.) have been excluded. Where a correct American form appears as a misspelling, it represents a British writer's attempt at the British form, such as "color" for "colour". Apart from dictionary words, the correct spellings also contain some proper nouns, abbreviations, words with apostrophes or hyphens, made-up words and two-word items (e.g. "too much") where the misspelling was a single string ("tomuch").
+
+Users of this corpus should bear in mind that it includes the efforts of young children and extremely poor spellers being subjected to spelling tests way beyond their ability, so some of the misspellings are very different from their targets; the single letter "o", for example, appears as a misspelling of the word "accordingly".
 
 
 ## References

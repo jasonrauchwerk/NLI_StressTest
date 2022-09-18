@@ -1,4 +1,5 @@
 import argparse
+import itertools
 import os
 import random
 import re
@@ -16,6 +17,35 @@ def tokenize(string):
 
 random.seed(12345)
 
+# Load homophones from file
+homophone_dict = {}
+with open('homophones-1.01.txt', 'r') as f:
+    for line in f:
+        word,*homophones = line.rstrip().split(',')
+        homophone_dict[word.lower()] = homophones
+
+# Load misspellings from file
+misspell_dict = {}
+with open('missp.dat', 'r') as f:
+    prev_word = None
+    missp_list = []
+    for line in f:
+        word = line.rstrip()
+        if word[0] == '$':
+            misspell_dict[prev_word] = missp_list
+            prev_word = word[1:].lower()
+            missp_list = []
+        else:
+            missp_list.append(word)
+    del misspell_dict[None]
+print(misspell_dict['admitted'])
+
+# Combine dicts
+replacement_dict = {}
+for key in itertools.chain(homophone_dict.keys(), misspell_dict.keys()):
+    replacement_dict[key] = homophone_dict.get(key,[]) + misspell_dict.get(key, [])
+
+
 # Load data
 parser = argparse.ArgumentParser(description='Directory with MultiNLI datasets')
 parser.add_argument('--base_dir', dest='base_dir', help='Directory with MultiNLI datasets')
@@ -27,15 +57,9 @@ with jsonlines.open(os.path.join(base_dir,'multinli_1.0_dev_matched.jsonl')) as 
     for obj in reader:
         dev_data.append(obj)
 
-# Load homophones from file
-replacement_dict = {}
-with open('homophones-1.01.txt', 'r') as f:
-    for line in f:
-        word,*homophones = line.rstrip().split(',')
-        replacement_dict[word.lower()] = homophones
-
 # Replace words in samples
 replaced_data = []
+changed_lines = 0
 for sample in dev_data:
     sentence = tokenize(sample["sentence2_binary_parse"])
     
@@ -54,9 +78,10 @@ for sample in dev_data:
         sample["sentence2"] = re.sub(rf'{orig}(?=\W|$)', sub, sample["sentence2"], count=1)
         sample["sentence2_parse"] = re.sub(rf'{orig}(?=\W|$)', sub, sample["sentence2_parse"], count=1)
         sample["sentence2_binary_parse"] = re.sub(rf'{orig}(?=\W|$)', sub, sample["sentence2_binary_parse"], count=1)
+        changed_lines += 1
 
     replaced_data.append(sample)
 
-print(len(replaced_data))
+print(len(changed_lines))
 with jsonlines.open("./multinli_1.0_matched_dev_homophones.jsonl", mode='w') as writer:
     writer.write_all(replaced_data)
