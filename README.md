@@ -56,7 +56,7 @@ Alternatively, you may write your own evaluation function: our script simply eva
 
 * Added the birkbeck dataset from [Roger Mitton's misspellings corpora at Birkbeck University of London](https://www.dcs.bbk.ac.uk/~roger/corpora.html). Header below
 
-HOMOPHONES
+### HOMOPHONES
 
 This is a list of homophones in "General American English". It is based on 
 the book _Handbook of Homophones_ by William Cameron Townsend, 1975. 
@@ -135,7 +135,7 @@ phone 214/709-3346, -2418
 fax 214/709-2433
 
 
-birkbeck
+### birkbeck
 
 The birkbeck file contains 36,133 misspellings of 6,136 words. It is an amalgamation of errors taken from the native-speaker section (British or American writers) of the Birkbeck spelling error corpus, a collection of files of spelling errors gathered from various sources, available as separate files with detailed documentation from the Oxford Text Archive. It includes the results of spelling tests and errors from free writing, taken mostly from schoolchildren, university students or adult literacy students. Most of them were originally handwritten.
 
