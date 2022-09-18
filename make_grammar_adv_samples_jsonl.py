@@ -79,7 +79,7 @@ for sample in dev_data:
         sample["sentence2_binary_parse"] = re.sub(rf'{orig}(?=\W|$)', sub, sample["sentence2_binary_parse"], count=1)
         changed_lines += 1
 
-    replaced_data.append(sample)
+        replaced_data.append(sample)
 
 print(changed_lines)
 with jsonlines.open("./multinli_1.0_matched_dev_replaced.jsonl", mode='w') as writer:
