@@ -36,7 +36,7 @@ with open('missp.dat', 'r') as f:
             prev_word = word[1:].lower()
             missp_list = []
         else:
-            missp_list.append(word)
+            missp_list.append(word.replace('_', ' '))
     del misspell_dict[None]
 
 # Combine dicts
