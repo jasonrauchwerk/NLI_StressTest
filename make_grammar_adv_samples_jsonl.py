@@ -83,5 +83,5 @@ for sample in dev_data:
     replaced_data.append(sample)
 
 print(len(changed_lines))
-with jsonlines.open("./multinli_1.0_matched_dev_homophones.jsonl", mode='w') as writer:
+with jsonlines.open("./multinli_1.0_matched_dev_replaced.jsonl", mode='w') as writer:
     writer.write_all(replaced_data)
