@@ -38,7 +38,6 @@ with open('missp.dat', 'r') as f:
         else:
             missp_list.append(word)
     del misspell_dict[None]
-print(misspell_dict['admitted'])
 
 # Combine dicts
 replacement_dict = {}
@@ -82,6 +81,6 @@ for sample in dev_data:
 
     replaced_data.append(sample)
 
-print(len(changed_lines))
+print(changed_lines)
 with jsonlines.open("./multinli_1.0_matched_dev_replaced.jsonl", mode='w') as writer:
     writer.write_all(replaced_data)
