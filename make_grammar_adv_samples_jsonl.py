@@ -1,3 +1,4 @@
+from curses.ascii import isupper
 import sys
 import json
 import jsonlines
@@ -16,61 +17,6 @@ def tokenize(string):
     string = re.sub(r'\(|\)', '', string)
     return string.lower().split()
 
-def is_all_lower(word):
-    all_chars = list(word)
-    for each_char in all_chars:
-        if each_char.isupper():
-            return False
-    return True
-
-
-def perturb_word_swap(word):
-    if len(word) == 2:
-        new_word = word[::-1]
-    else:
-        char_ind = int(np.random.uniform(0, len(word) - 1))
-        new_word = list(word)
-        first_char = new_word[char_ind]
-        new_word[char_ind] = new_word[char_ind + 1]
-        new_word[char_ind + 1] = first_char
-        new_word = "".join(new_word)
-    return new_word
-
-
-def perturb_word_kb(word):
-    keyboard_char_dict = {"a": ['s'], "b": ['v', 'n'], "c": ['x', 'v'], "d": ['s', 'f'], "e": ['r', 'w'],
-                          "f": ['g', 'd'], "g": ['f', 'h'], "h": ['g', 'j'], "i": ['u', 'o'], "j": ['h', 'k'],
-                          "k": ['j', 'l'], "l": ['k'], "m": ['n'], "n": ['m', 'b'], "o": ['i', 'p'], "p": ['o'],
-                          "q": ['w'], "r": ['t', 'e'], "s": ['d', 'a'], "t": ['r', 'y'],
-                          "u": ['y', 'i'], "v": ['c', 'b'], "w": ['e', 'q'], "x": ['z', 'c'], "y": ['t', 'u'],
-                          "z": ['x']}
-    if len(word) > 1:
-        new_word = list(word)
-        acceptable_subs = []
-        for ind, each_char in enumerate(new_word):
-            if each_char.lower() in keyboard_char_dict.keys():
-                acceptable_subs.append(ind)
-
-        if len(acceptable_subs) == 0:
-            return None
-
-        char_ind = random.choice(acceptable_subs)
-
-        first_char = new_word[char_ind]
-
-        new_word[char_ind] = random.choice(keyboard_char_dict[first_char.lower()])
-        final_new_word = "".join(new_word)
-    return final_new_word
-
-
-
-samples = []
-
-char_swap = []
-key_swap = []
-content_data = []
-function_data = []
-
 # Load data
 parser = argparse.ArgumentParser(description='Directory with MultiNLI datasets')
 parser.add_argument('--base_dir', dest='base_dir', help='Directory with MultiNLI datasets')
@@ -83,63 +29,32 @@ homophones_dict = {}
 with open('homophones-1.01.txt', 'r') as f:
     for line in f:
         word,*homophones = line.split(',')
-        homophones_dict[word] = homophones
+        homophones_dict[word.lower()] = homophones
 
+# Replace words in samples
+replaced_data = []
 for sample in dev_data:
+    sentence = tokenize(sample["sentence2_binary_parse"])
+    
+    possible_substitutions = []
+    for i,word in sentence:
+        l_word = word.lower()
+        if l_word in homophones_dict:
+            possible_substitutions.extend([(word,hom) for hom in homophones_dict[l_word]])
 
-        '''Keyboard swaps in hypothesis'''
-        keyboard_char_dict = {"a": ['s'], "b": ['v', 'n'], "c": ['x', 'v'], "d": ['s', 'f'], "e": ['r', 'w'],
-                              "f": ['g', 'd'], "g": ['f', 'h'], "h": ['g', 'j'], "i": ['u', 'o'], "j": ['h', 'k'],
-                              "k": ['j', 'l'], "l": ['k'], "m": ['n'], "n": ['m', 'b'], "o": ['i', 'p'], "p": ['o'],
-                              "q": ['w'], "r": ['t', 'e'], "s": ['d', 'a'], "t": ['r', 'y'],
-                              "u": ['y', 'i'], "v": ['c', 'b'], "w": ['e', 'q'], "x": ['z', 'c'], "y": ['t', 'u'],
-                              "z": ['x']}
-        sentence = tokenize(sample["sentence2_binary_parse"])
-        new_sample = copy.deepcopy(sample)
+    if len(possible_substitutions) > 0:
+        orig,sub = random.choice(possible_substitutions)
+        # Keep capitalization
+        if orig[0].isupper():
+            sub = sub.capitalize()
+        sample["sentence2_binary_parse"] = sample["sentence2_binary_parse"].replace(orig, sub, 1)
+        sample["sentence2"] = sample["sentence2"].replace(orig, sub, 1)
+        sample["sentence2_parse"] = sample["sentence2_parse"].replace(orig, sub, 1)
 
-        print ("====")
-        print("hypothesis keyborard")
-        #print(word)
+    replaced_data.append(sample)
 
-        found_sub = False
-        while not found_sub:
-            word = random.choice(sentence)
-            first_char = ""
-            if len(word) > 1:
-                new_word = list(word)
-                acceptable_subs = []
-                for ind, each_char in enumerate(new_word):
-                    if each_char in keyboard_char_dict.keys():
-                        acceptable_subs.append(ind)
-                if len(acceptable_subs) == 0:
-                    continue
-
-                char_ind = random.choice(acceptable_subs)
-
-                first_char = new_word[char_ind]
-
-                new_word[char_ind] = random.choice(keyboard_char_dict[first_char])
-                final_new_word = "".join(new_word)
-                if word[0].upper() + word[1:] in new_sample["sentence2"]:
-                    proper_form = word[0].upper() + word[1:]
-                    final_new_word_form = final_new_word[0].upper() + final_new_word[1:]
-                    new_sample["sentence2_binary_parse"] = new_sample["sentence2_binary_parse"].replace(proper_form,
-                                                                                                        final_new_word_form,
-                                                                                                        1)
-                    new_sample["sentence2"] = new_sample["sentence2"].replace(proper_form, final_new_word_form, 1)
-                    new_sample["sentence2_parse"] = new_sample["sentence2_parse"].replace(proper_form, final_new_word_form,
-                                                                                          1)
-                else:
-
-                    new_sample["sentence2_binary_parse"] = new_sample["sentence2_binary_parse"].replace(word,
-                                                                                                        final_new_word, 1)
-                    new_sample["sentence2"] = new_sample["sentence2"].replace(word, final_new_word, 1)
-                    new_sample["sentence2_parse"] = new_sample["sentence2_parse"].replace(word, final_new_word, 1)
-                found_sub = True
-                key_swap.append(new_sample)
-
-print(len(function_data))
+print(len(replaced_data))
 with jsonlines.open("./multinli_0.9_matched_dev_gram_functionword_swap_pertubed.jsonl", mode='w') as writer:
-    writer.write_all(function_data)
+    writer.write_all(replaced_data)
     writer.close()
 
