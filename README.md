@@ -92,6 +92,7 @@ least once in the tail of the list. This scheme permits retrieval from the
 list by examining the headword of each line only. For instance:
 
 ascent,assent
+
 assent,ascent
 
 In general, regularly inflected forms of an entry are not included; thus the
