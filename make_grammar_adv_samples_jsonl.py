@@ -1,15 +1,10 @@
-from curses.ascii import isupper
-import sys
-import json
-import jsonlines
-#import data_preprocessing as dp
-#import numpy as np
-import math
-import re
-import random
-import copy
 import argparse
 import os
+import random
+import re
+from curses.ascii import isupper
+
+import jsonlines
 
 '''Types of perturbations: both character swaps and keyboard typos
 Content words and function words'''
