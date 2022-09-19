@@ -36,7 +36,6 @@ def replace_samples(dev_data, replacement_dict):
             sample["sentence2"] = re.sub(rf'{orig}(?=\W|$)', sub, sample["sentence2"], count=1)
             sample["sentence2_parse"] = re.sub(rf'{orig}(?=\W|$)', sub, sample["sentence2_parse"], count=1)
             sample["sentence2_binary_parse"] = re.sub(rf'{orig}(?=\W|$)', sub, sample["sentence2_binary_parse"], count=1)
-            changed_lines += 1
 
             replaced_data.append(sample)
 
@@ -72,30 +71,11 @@ replacement_dict = {}
 for key in itertools.chain(homophone_dict.keys(), misspell_dict.keys()):
     replacement_dict[key] = homophone_dict.get(key,[]) + misspell_dict.get(key, [])
 
+for dataset in ['multinli_1.0_dev_matched', 'multinli_1.0_dev_mismatched', 'multinli_1.0_train']:
+    dev_data = []
+    with jsonlines.open(f'../data/{dataset}.jsonl', mode='r') as reader:
+        for obj in reader:
+            dev_data.append(obj)
 
-# Matched dataset
-dev_data = []
-with jsonlines.open('../data/multinli_1.0_dev_matched.jsonl', mode='r') as reader:
-    for obj in reader:
-        dev_data.append(obj)
-
-with jsonlines.open("../data/multinli_1.0_dev_matched_replaced.jsonl", mode='w') as writer:
-    writer.write_all(replace_samples(dev_data, replacement_dict))
-
-# Mismatched dataset
-dev_data = []
-with jsonlines.open('../data/multinli_1.0_dev_mismatched.jsonl', mode='r') as reader:
-    for obj in reader:
-        dev_data.append(obj)
-
-with jsonlines.open("../data/multinli_1.0_dev_mismatched_replaced.jsonl", mode='w') as writer:
-    writer.write_all(replace_samples(dev_data, replacement_dict))
-
-# Training dataset
-dev_data = []
-with jsonlines.open('../data/multinli_1.0_train.jsonl', mode='r') as reader:
-    for obj in reader:
-        dev_data.append(obj)
-
-with jsonlines.open("../data/multinli_1.0_train.jsonl", mode='w') as writer:
-    writer.write_all(replace_samples(dev_data, replacement_dict))
+    with jsonlines.open(f'../data/{dataset}_replaced.jsonl', mode='w') as writer:
+        writer.write_all(replace_samples(dev_data, replacement_dict))
