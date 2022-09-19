@@ -15,6 +15,34 @@ def tokenize(string):
     return string.lower().split()
 
 
+def replace_samples(dev_data, replacement_dict):
+    # Replace words in samples
+    replaced_data = []
+    for sample in dev_data:
+        sentence = tokenize(sample["sentence2_binary_parse"])
+        
+        possible_substitutions = []
+        for word in sentence:
+            l_word = word.lower()
+            if l_word in replacement_dict:
+                possible_substitutions.extend([(word,hom) for hom in replacement_dict[l_word]])
+
+        # substitute if possible
+        if len(possible_substitutions) > 0:
+            orig,sub = random.choice(possible_substitutions)
+            # Keep capitalization
+            if orig[0].isupper():
+                sub = sub.capitalize()
+            sample["sentence2"] = re.sub(rf'{orig}(?=\W|$)', sub, sample["sentence2"], count=1)
+            sample["sentence2_parse"] = re.sub(rf'{orig}(?=\W|$)', sub, sample["sentence2_parse"], count=1)
+            sample["sentence2_binary_parse"] = re.sub(rf'{orig}(?=\W|$)', sub, sample["sentence2_binary_parse"], count=1)
+            changed_lines += 1
+
+            replaced_data.append(sample)
+
+    return replaced_data
+
+
 random.seed(12345)
 
 # Load homophones from file
@@ -45,42 +73,29 @@ for key in itertools.chain(homophone_dict.keys(), misspell_dict.keys()):
     replacement_dict[key] = homophone_dict.get(key,[]) + misspell_dict.get(key, [])
 
 
-# Load data
-parser = argparse.ArgumentParser(description='Directory with MultiNLI datasets')
-parser.add_argument('--base_dir', dest='base_dir', help='Directory with MultiNLI datasets')
-args = parser.parse_args()
-base_dir = args.base_dir
-
+# Matched dataset
 dev_data = []
-with jsonlines.open(os.path.join(base_dir,'multinli_1.0_dev_matched.jsonl')) as reader:
+with jsonlines.open('../data/multinli_1.0_dev_matched.jsonl', mode='r') as reader:
     for obj in reader:
         dev_data.append(obj)
 
-# Replace words in samples
-replaced_data = []
-changed_lines = 0
-for sample in dev_data:
-    sentence = tokenize(sample["sentence2_binary_parse"])
-    
-    possible_substitutions = []
-    for word in sentence:
-        l_word = word.lower()
-        if l_word in replacement_dict:
-            possible_substitutions.extend([(word,hom) for hom in replacement_dict[l_word]])
+with jsonlines.open("../data/multinli_1.0_dev_matched_replaced.jsonl", mode='w') as writer:
+    writer.write_all(replace_samples(dev_data, replacement_dict))
 
-    # substitute if possible
-    if len(possible_substitutions) > 0:
-        orig,sub = random.choice(possible_substitutions)
-        # Keep capitalization
-        if orig[0].isupper():
-            sub = sub.capitalize()
-        sample["sentence2"] = re.sub(rf'{orig}(?=\W|$)', sub, sample["sentence2"], count=1)
-        sample["sentence2_parse"] = re.sub(rf'{orig}(?=\W|$)', sub, sample["sentence2_parse"], count=1)
-        sample["sentence2_binary_parse"] = re.sub(rf'{orig}(?=\W|$)', sub, sample["sentence2_binary_parse"], count=1)
-        changed_lines += 1
+# Mismatched dataset
+dev_data = []
+with jsonlines.open('../data/multinli_1.0_dev_mismatched.jsonl', mode='r') as reader:
+    for obj in reader:
+        dev_data.append(obj)
 
-        replaced_data.append(sample)
+with jsonlines.open("../data/multinli_1.0_dev_mismatched_replaced.jsonl", mode='w') as writer:
+    writer.write_all(replace_samples(dev_data, replacement_dict))
 
-print(changed_lines)
-with jsonlines.open("./multinli_1.0_matched_dev_replaced.jsonl", mode='w') as writer:
-    writer.write_all(replaced_data)
+# Training dataset
+dev_data = []
+with jsonlines.open('../data/multinli_1.0_train.jsonl', mode='r') as reader:
+    for obj in reader:
+        dev_data.append(obj)
+
+with jsonlines.open("../data/multinli_1.0_train.jsonl", mode='w') as writer:
+    writer.write_all(replace_samples(dev_data, replacement_dict))
